@@ -10,6 +10,7 @@
     tools:context="com.stateless.app.richeditordemo.MainActivity">
 
     <com.stateless.lib.richedit.view.RichEditorStandard
+        android:id="@+id/res_editor"
         android:layout_width="match_parent"
         android:layout_height="match_parent"></com.stateless.lib.richedit.view.RichEditorStandard>
 

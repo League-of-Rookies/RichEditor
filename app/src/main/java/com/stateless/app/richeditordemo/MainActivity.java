@@ -12,6 +12,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        RichEditorStandard richEditorStandard=(RichEditorStandard)findViewById(R.id.editor);
+        RichEditorStandard richEditorStandard=(RichEditorStandard)findViewById(R.id.res_editor);
     }
 }
