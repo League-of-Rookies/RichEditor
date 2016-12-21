@@ -1,8 +1,10 @@
 package com.stateless.lib.richedit.view;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -169,14 +171,14 @@ public class RichEditor extends WebView {
     public RichEditor(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        setVerticalScrollBarEnabled(false);
-        setHorizontalScrollBarEnabled(false);
-        getSettings().setJavaScriptEnabled(true);
-
-        setWebChromeClient(new WebChromeClient());
-        setWebViewClient(createWebViewClient());
-        addJavascriptInterface(new AndroidDelegate(), "AndroidDelegate");
-        loadUrl(SETUP_HTML);
+//        setVerticalScrollBarEnabled(false);
+//        setHorizontalScrollBarEnabled(false);
+//        getSettings().setJavaScriptEnabled(true);
+//
+//        setWebChromeClient(new WebChromeClient());
+//        setWebViewClient(createWebViewClient());
+//        addJavascriptInterface(new AndroidDelegate(), "AndroidDelegate");
+//        loadUrl(SETUP_HTML);
 
 
     }
@@ -609,6 +611,7 @@ public class RichEditor extends WebView {
         init(context, delegate, Boolean.valueOf(false), Boolean.valueOf(false), Boolean.valueOf(false));
     }
 
+    @TargetApi(17)
     public void init(Context context, final EditorDelegate delegate, final Boolean isNightMode, final Boolean isMarkdown, Boolean isPreview){
         this.context=context;
         this.delegate=delegate;
@@ -894,6 +897,8 @@ public class RichEditor extends WebView {
         resumeTimers();
     }
 
+
+
     public void setArticleContent(String paramString)
     {
         execJS("Maleskine.setContent(\"" + regularizeString(paramString) + "\");");
@@ -965,20 +970,6 @@ public class RichEditor extends WebView {
         this.isUsingActiveMonitor = true;
         execJS("ZSSEditor.usingActiveMonitor=true;");
     }
-
-    /*
-    * 常用放出的方法
-    * */
-
-    public void redo() {
-        exec("redo");
-    }
-
-    public void undo() {
-        exec("undo");
-    }
-
-
 
 
     public static class ContentStyle{
@@ -1363,9 +1354,164 @@ public class RichEditor extends WebView {
         public JSBridge(){}
 
         @JavascriptInterface
+        public void init(WebView webView){
+            Log.d(TAG,"!!!!!!! On JavascriptInterface Init !!!!!!!");
+            post(fireOnEditorReady);
+        }
+
+        @JavascriptInterface
+        public void log(WebView webView,String msg){
+            Log.d(TAG,"New Log From JS:\n"+msg);
+        }
+
+        @JavascriptInterface
+        public void onSelectionChanged(WebView webView,String param){
+            String id="";
+            int y=0;
+            int h=0;
+            int s=0;
+            String[]params=param.split("~",-1);
+
+            int i2=params.length;
+            int i=0;
+            if (i<i2){
+                String [] line=params[i].split("=");
+                if (line.length<2){
+                    return;
+                }
+                String tag=line[0];
+                if (tag.equals(this.tagID)){
+                    id=line[1];
+                }else if (tag.equals(this.tagY)){
+                    double d=Double.valueOf(line[1]).doubleValue();
+                    y=(int)d;
+                }else if (tag.equals(this.tagH)){
+                    double d=Double.valueOf(line[1]).doubleValue();
+                    h=(int)d;
+                }else if (tag.equals(this.tagS)){
+                    s= Integer.parseInt(line[1]);
+                }
+            }
+
+            if (id.length()>0){
+                currentElementID=id;
+                yOffset=y;
+                lineHeight=h;
+                hasSelection=(s!=0?true:false);
+            }
+            Log.d(TAG,"onSelectionChanged y param "+param);
+            post(fireOnGetSelectionInfo);
+
+        }
+
+        @JavascriptInterface
+        public void onSelectionStyles(WebView webView,String param){
+            Log.d(TAG,"onSelectionStyles "+param);
+            String [] params=param.split("~",-1);
+            CurrentStyles.reset();
+            CurrentStyles.setStyles(params);
+            post(fireOnGetSelectionStyles);
+        }
+
+        @JavascriptInterface
+        public void onInput(WebView webView){
+            Log.d(TAG,"onInput ");
+            post(fireOnInput);
+        }
+
+        @JavascriptInterface
+        public  void onTap(WebView webView){
+            Log.d(TAG,"onTap ");
+            post(fireOnTap);
+        }
+
+        @JavascriptInterface
+        public void onTapImage(WebView webView,String param){
+            try {
+                String[] segments=param.split("~");
+                if (segments.length>=3){
+                    mLastTapImageId=segments[1].split("=")[1];
+                    mLastTapImageUrl=segments[2].split("=")[1];
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            Log.d(TAG,"Tap Image: "+param+" imageID "+mLastTapImageId+" url "+mLastTapImageUrl);
+            post(fireOnTapImage);
+        }
+
+        @JavascriptInterface
+        public void onTapLink(WebView webView,String param){
+            try {
+                String[] segments=param.split("~");
+                if (segments.length>=3){
+                    mLastTapLinkUrl=segments[1].split("=")[1];
+                    mLastTapLinkName=segments[2].split("=")[1];
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            Log.d(TAG,"onTapLink "+param+" url "+mLastTapLinkUrl+" name "+mLastTapLinkName);
+            post(fireOnTapLink);
+        }
+
+        @JavascriptInterface
+        public void onPaste(WebView webView) {
+            post(fireOnPaste);
+        }
+
+        @JavascriptInterface
+        public  void onGetImageStatus(WebView webView,String loadedImages,String loadingImages,String failedImages){
+            if (loadedImages.length()>4){
+                loadedImages=loadedImages.substring(2,loadedImages.length()-2);
+                RichEditor.this.loadedImages=loadedImages.split("\",\"");
+            }else {
+                RichEditor.this.loadedImages=new String[]{""};
+            }
+
+            if (loadingImages.length()>4){
+                loadingImages=loadingImages.substring(2,loadingImages.length()-2);
+                RichEditor.this.loadingImages=loadingImages.split("\",\"");
+            }else {
+                RichEditor.this.loadingImages=new String[]{""};
+            }
+
+
+            if (failedImages.length()>4){
+                failedImages=failedImages.substring(2,failedImages.length()-2);
+                RichEditor.this.failedImages=failedImages.split("\",\"");
+            }else {
+                RichEditor.this.failedImages=new String[]{""};
+            }
+
+            post(fireOnGetImageStatus);
+        }
+
+        @JavascriptInterface
+        public void getTitle(WebView webView,String title){
+            RichEditor.this.articleTitle=title;
+            post(fireOnGetTitle);
+        }
+
+        @JavascriptInterface
         public void getContent(WebView webView, String content) {
             articleContent = content;
             post(fireOnGetContent);
+        }
+
+        @JavascriptInterface
+        public void getWordage(WebView webView, int wordage) {
+            //            if(v.a()) {
+//                v.b(TAG, "onGetSelectTExt " + selectText);
+//            }
+
+            try {
+                articleWordage=Integer.valueOf(wordage).intValue();
+            }catch (Exception e){
+                articleWordage =0;
+            }
+
+            post(fireOnGetWordage);
         }
 
         @JavascriptInterface
@@ -1375,6 +1521,15 @@ public class RichEditor extends WebView {
 //            }
             selectedText = selectText;
             post(fireOnGetSelectedText);
+        }
+
+        public void showKeyboard(WebView webView){
+            RichEditor.this.showKeyboard();
+        }
+
+
+        public void hideKeyboard(WebView webView){
+            RichEditor.this.hideKeyboard();
         }
     }
 
