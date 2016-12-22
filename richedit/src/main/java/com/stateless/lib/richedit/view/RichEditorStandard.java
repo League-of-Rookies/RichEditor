@@ -40,37 +40,43 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
         editorDelegate = new RichEditor.EditorDelegate() {
             @Override
             public void onGetContent(String paramString) {
-
+                Log.d("stateless","onGetContent: "+paramString);
             }
 
             @Override
             public void onGetImageStatus(String[] paramArrayOfString1, String[] paramArrayOfString2, String[] paramArrayOfString3) {
 
+                Log.d("stateless","onGetImageStatus: "+paramArrayOfString1+"---"+paramArrayOfString2+"---"+paramArrayOfString3);
             }
 
             @Override
             public void onGetSelectionInfo(String paramString, int paramInt1, int paramInt2, boolean paramBoolean) {
 
+                Log.d("stateless","onGetSelectionInfo: "+paramString+"---"+paramInt1+"---"+paramInt2+"---"+paramBoolean);
             }
 
             @Override
             public void onGetSelectionStyles(RichEditor.ContentStyle paramContentStyle) {
 
+                Log.d("stateless","onGetSelectionStyles: "+paramContentStyle);
             }
 
             @Override
             public void onGetSelectionText(String paramString) {
 
+                Log.d("stateless","onGetSelectionText: "+paramString);
             }
 
             @Override
             public void onGetTitle(String paramString) {
 
+                Log.d("stateless","onGetTitle: "+paramString);
             }
 
             @Override
             public void onGetWordage(int paramInt) {
 
+                Log.d("stateless","onGetWordage: "+paramInt);
             }
 
             @Override
@@ -81,6 +87,7 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
             @Override
             public void onInput() {
 
+                Log.d("stateless","onInput: ");
             }
 
             @Override
@@ -97,24 +104,30 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
             @Override
             public void onTap() {
 
+                Log.d("stateless","onTap: ");
             }
 
             @Override
             public void onTapImage(String paramString1, String paramString2) {
 
+                Log.d("stateless","onTapImage: "+paramString1+"----"+paramString2);
             }
 
             @Override
             public void onTapLink(String paramString1, String paramString2) {
 
+                Log.d("stateless","onTapLink: "+paramString1+"----"+paramString2);
             }
         };
         richEditor.init(mContext, editorDelegate, false, true, true);
         TextView redo = (TextView) findViewById(R.id.tv_redo);
         TextView undo = (TextView) findViewById(R.id.tv_undo);
 
+        TextView h1 = (TextView) findViewById(R.id.tv_h1);
+
         redo.setOnClickListener(this);
         undo.setOnClickListener(this);
+        h1.setOnClickListener(this);
     }
 
     @Override
@@ -124,7 +137,8 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
             richEditor.callRedo();
         } else if (i == R.id.tv_undo) {
             richEditor.callUndo();
-        } else {
+        } else if (i==R.id.tv_h1){
+            richEditor.callInsertRuleLine();
 
         }
 
