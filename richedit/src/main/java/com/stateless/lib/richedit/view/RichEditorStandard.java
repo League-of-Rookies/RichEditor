@@ -1,7 +1,11 @@
 package com.stateless.lib.richedit.view;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.renderscript.Script;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,9 +20,10 @@ import com.stateless.lib.richedit.R;
  * 标准的富文本编辑器 封装ui和简书app的一致
  */
 public class RichEditorStandard extends RelativeLayout implements View.OnClickListener{
-    private Context mContext;
+    private Activity mContext;
     private RichEditor richEditor;
     private RichEditor.EditorDelegate editorDelegate;
+    private RecyclerView rvWordStyle;
 
     public RichEditorStandard(Context context) {
         this(context, null);
@@ -30,7 +35,7 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
 
     public RichEditorStandard(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mContext=context;
+        mContext=(Activity) context;
         initView();
     }
 
@@ -120,14 +125,96 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
             }
         };
         richEditor.init(mContext, editorDelegate, false, true, true);
+        rvWordStyle = (RecyclerView)findViewById(R.id.rv_word_style);
+        initWordStyleList();
+
+        TextView media = (TextView) findViewById(R.id.tv_media);
+
         TextView redo = (TextView) findViewById(R.id.tv_redo);
         TextView undo = (TextView) findViewById(R.id.tv_undo);
-
-        TextView h1 = (TextView) findViewById(R.id.tv_h1);
+        TextView wordStyle = (TextView) findViewById(R.id.tv_word_style);
+        TextView more = (TextView) findViewById(R.id.tv_more);
 
         redo.setOnClickListener(this);
         undo.setOnClickListener(this);
-        h1.setOnClickListener(this);
+        more.setOnClickListener(this);
+        wordStyle.setOnClickListener(this);
+    }
+
+    private void initWordStyleList() {
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        rvWordStyle.setLayoutManager(layoutManager);
+
+        final WordStyleAdapter adapter = new WordStyleAdapter(getContext());
+        rvWordStyle.setAdapter(adapter);
+
+
+        rvWordStyle.addOnItemTouchListener(new RecyclerViewClickListener(getContext(), rvWordStyle, new RecyclerViewClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                WordStyleModel model = adapter.getList().get(position);
+                if (position>3){
+
+                    for (int i=0;i<adapter.getList().size();i++){
+                        if (i>3){
+                            if (i==position){
+                                continue;
+                            }
+                            adapter.getList().get(i).setSelect(false);
+
+                        }
+                    }
+                    model.setSelect(!model.isSelect());
+                }else {
+                    model.setSelect(!model.isSelect());
+                }
+                adapter.notifyDataSetChanged();
+                clickWordStyle(position);
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+
+            }
+        }));
+    }
+
+    private void clickWordStyle(int position) {
+        switch (position){
+            case 0:
+                richEditor.callSetFontBold();
+                break;
+            case 1:
+                richEditor.callSetFontItalic();
+                break;
+            case 2:
+                richEditor.callSetFontStrikethrough();
+                break;
+            case 3:
+                richEditor.callSetFontUnderline();
+                break;
+            case 4:
+                richEditor.callSetBlockquote();
+                break;
+            case 5:
+                richEditor.callSetHeader(1);
+                break;
+            case 6:
+
+                richEditor.callSetHeader(2);
+                break;
+            case 7:
+
+                richEditor.callSetHeader(3);
+                break;
+            case 8:
+
+                richEditor.callSetHeader(4);
+                break;
+
+
+        }
     }
 
     @Override
@@ -137,10 +224,51 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
             richEditor.callRedo();
         } else if (i == R.id.tv_undo) {
             richEditor.callUndo();
-        } else if (i==R.id.tv_h1){
-            richEditor.callInsertRuleLine();
+        } else if (i==R.id.tv_more){
+            final MoreDialogFragment moreDialogFragment=new MoreDialogFragment();
+            moreDialogFragment.setDialogListener(new MoreDialogFragment.MoreDialogFragmentListener() {
+                @Override
+                public void clickLine() {
+                    richEditor.callInsertRuleLine();
+                    moreDialogFragment.dismiss();
+                }
 
+                @Override
+                public void clickLink() {
+                    final InputLinkDialogFragment inputLinkDialogFragment=new InputLinkDialogFragment();
+                    inputLinkDialogFragment.setDialogListener(new InputLinkDialogFragment.InputLinkDialogFragmentListener() {
+                        @Override
+                        public void clickCancel() {
+                            inputLinkDialogFragment.dismiss();
+                        }
+
+                        @Override
+                        public void clickSure(String name, String link) {
+                            richEditor.callInsertLink(link,name);
+                            inputLinkDialogFragment.dismiss();
+                        }
+                    });
+
+                    inputLinkDialogFragment.show(mContext.getFragmentManager(), "input_link_dialog_fragment");
+                    moreDialogFragment.dismiss();
+                }
+            });
+
+            moreDialogFragment.show(mContext.getFragmentManager(), "more_dialog_fragment");
+
+
+        }else if (i==R.id.tv_word_style){
+            if (rvWordStyle.isShown()){
+                rvWordStyle.setVisibility(GONE);
+            }else {
+                rvWordStyle.setVisibility(VISIBLE);
+            }
         }
 
     }
+
+
+//    class WordStyleAdapter extends RecyclerView.Adapter<>{
+//
+//    }
 }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tv_fen_ge_line"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="分割线"
+        android:gravity="center"
+        />
+
+    <TextView
+        android:id="@+id/tv_link"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="链接"
+        android:gravity="center"
+        />
+</LinearLayout>

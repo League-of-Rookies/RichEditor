@@ -6,9 +6,13 @@
     <com.stateless.lib.richedit.view.RichEditor
         android:id="@+id/editor"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></com.stateless.lib.richedit.view.RichEditor>
+        android:layout_height="match_parent">
+
+    </com.stateless.lib.richedit.view.RichEditor>
+
 
     <LinearLayout
+        android:id="@+id/ll_menu"
         android:layout_width="match_parent"
         android:orientation="horizontal"
         android:layout_height="40dp"
@@ -16,6 +20,7 @@
         android:background="#f5f5f5"
         >
         <TextView
+            android:id="@+id/tv_media"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -23,6 +28,7 @@
             android:text="图"
             />
         <TextView
+            android:id="@+id/tv_word_style"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -30,7 +36,7 @@
             android:text="A"
             />
         <TextView
-            android:id="@+id/tv_h1"
+            android:id="@+id/tv_more"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -55,5 +61,11 @@
             />
     </LinearLayout>
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_word_style"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_above="@+id/ll_menu"
+        android:layout_height="wrap_content"></android.support.v7.widget.RecyclerView>
 
 </RelativeLayout>
