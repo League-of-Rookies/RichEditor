@@ -2,6 +2,7 @@ package com.stateless.lib.richedit.view;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.renderscript.Script;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,6 +25,10 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
     private RichEditor richEditor;
     private RichEditor.EditorDelegate editorDelegate;
     private RecyclerView rvWordStyle;
+
+    public RichEditor getRichEditor() {
+        return richEditor;
+    }
 
     public RichEditorStandard(Context context) {
         this(context, null);
@@ -139,6 +144,7 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
         undo.setOnClickListener(this);
         more.setOnClickListener(this);
         wordStyle.setOnClickListener(this);
+        media.setOnClickListener(this);
     }
 
     private void initWordStyleList() {
@@ -253,22 +259,30 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
                     moreDialogFragment.dismiss();
                 }
             });
-
             moreDialogFragment.show(mContext.getFragmentManager(), "more_dialog_fragment");
-
-
         }else if (i==R.id.tv_word_style){
             if (rvWordStyle.isShown()){
                 rvWordStyle.setVisibility(GONE);
             }else {
                 rvWordStyle.setVisibility(VISIBLE);
             }
+        }else if (i == R.id.tv_media) {
+            if (richEditorListener!=null){
+                richEditorListener.clickMedia();
+            }
         }
 
     }
 
 
-//    class WordStyleAdapter extends RecyclerView.Adapter<>{
-//
-//    }
+    public  interface  RichEditorListener{
+        void clickMedia();
+    }
+
+
+    RichEditorListener richEditorListener;
+
+    public void setRichEditorListener(RichEditorListener richEditorListener) {
+        this.richEditorListener = richEditorListener;
+    }
 }
