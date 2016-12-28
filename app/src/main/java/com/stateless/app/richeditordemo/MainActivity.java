@@ -16,11 +16,20 @@ import com.qiniu.android.storage.UpCompletionHandler;
 import com.qiniu.android.storage.UpProgressHandler;
 import com.qiniu.android.storage.UploadManager;
 import com.qiniu.android.storage.UploadOptions;
+import com.qiniu.android.utils.UrlSafeBase64;
 import com.stateless.lib.richedit.view.RichEditorStandard;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.Date;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import static javax.xml.transform.OutputKeys.ENCODING;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -54,10 +63,13 @@ public class MainActivity extends AppCompatActivity {
                 c.moveToFirst();
                 int columnIndex = c.getColumnIndex(filePathColumns[0]);
                 String imagePath = c.getString(columnIndex);
-//                richEditorStandard.getRichEditor().callInsertImage(imagePath,"图片发自于 stateless",imagePath,"s",200,200);
-                richEditorStandard.getRichEditor().callInsertUploadingImagePlaceholder("1",imagePath);
-//                richEditorStandard.getRichEditor().callMarkImageUploadFailed("1","上传失败");
-                richEditorStandard.getRichEditor().callSetUploadingProgressOfImage("1",40);
+
+                File file=new File(imagePath);
+                String key = System.currentTimeMillis() + "_" + file.getName();
+                richEditorStandard.getRichEditor().callInsertUploadingImagePlaceholder(key,imagePath);
+
+
+                uploadPic(key,file);
                 c.close();
             }
         }
@@ -65,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private volatile boolean isCancelled = false;
-    void uploadPic(File file){
+    void uploadPic(final String key,final File file){
         Configuration config = new Configuration.Builder().zone(Zone.httpAutoZone).build();
         UploadManager uploadManager = new UploadManager(config);
 //        data = <File对象、或 文件路径、或 字节数组>
@@ -73,9 +85,35 @@ public class MainActivity extends AppCompatActivity {
 //        String token = <从服务端SDK获取>;
 
         // 初始化、执行上传
+        // 1 构造上传策略
+        JSONObject _json = new JSONObject();
+        long _dataline = System.currentTimeMillis() / 1000 + 3600;
+        try {
+            _json.put("deadline", _dataline);// 有效时间为一个小时
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        try {
+            _json.put("scope", "stateless");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        String _encodedPutPolicy = UrlSafeBase64.encodeToString(_json
+                .toString().getBytes());
+        byte[] _sign = new byte[0];
+        try {
+            _sign = HmacSHA1Encrypt(_encodedPutPolicy, ConfigConstants.QINIU_SECRETKEY);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String _encodedSign = UrlSafeBase64.encodeToString(_sign);
+        String _uploadToken = ConfigConstants.QINIU_ACCESSKEY + ':' + _encodedSign + ':'
+                + _encodedPutPolicy;
 
 
-        uploadManager.put(file, file.getName(), "",
+
+
+        uploadManager.put(file,  key, _uploadToken,
                 new UpCompletionHandler() {
                     @Override
                     public void complete(String key, ResponseInfo info, JSONObject res) {
@@ -83,10 +121,17 @@ public class MainActivity extends AppCompatActivity {
                         if(info.isOK())
                         {
                             Log.i("qiniu", "Upload Success");
+                            try {
+                                richEditorStandard.getRichEditor().callUpdateUploadingImagePlaceholder(key,"http://7xpk45.com1.z0.glb.clouddn.com/"+res.getString("key"),"http://7xpk45.com1.z0.glb.clouddn.com/"+res.getString("key"),"");
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
                         }
                         else{
                             Log.i("qiniu", "Upload Fail");
                             //如果失败，这里可以把info信息上报自己的服务器，便于后面分析上传错误原因
+                            richEditorStandard.getRichEditor().callMarkImageUploadFailed(key,"上传失败");
                         }
                         Log.i("qiniu", key + ",\r\n " + info + ",\r\n " + res);
                     }
@@ -94,6 +139,8 @@ public class MainActivity extends AppCompatActivity {
                         null, null, false, new UpProgressHandler(){
                     public void progress(String key, double percent){
                         Log.i("qiniu", key + ": " + percent);
+                        richEditorStandard.getRichEditor().callSetUploadingProgressOfImage(key,(int)(percent*100));
+
                     }
                 },
                         new UpCancellationSignal(){
@@ -103,4 +150,33 @@ public class MainActivity extends AppCompatActivity {
                         })
                 );
     }
+
+
+    /**
+     *
+     使用 HMAC-SHA1 签名方法对encryptText进行签名
+     *
+     * @param encryptText
+     *            被签名的字符串
+     * @param encryptKey
+     *            密钥
+     * @return
+     * @throws Exception
+     */
+    public static byte[] HmacSHA1Encrypt(String encryptText, String encryptKey)
+            throws Exception {
+        byte[] data = encryptKey.getBytes(ENCODING);
+        // 根据给定的字节数组构造一个密钥,第二参数指定一个密钥算法的名称
+        SecretKey secretKey = new SecretKeySpec(data, MAC_NAME);
+        // 生成一个指定 Mac 算法 的 Mac 对象
+        Mac mac = Mac.getInstance(MAC_NAME);
+        // 用给定密钥初始化 Mac 对象
+        mac.init(secretKey);
+        byte[] text = encryptText.getBytes(ENCODING);
+        // 完成 Mac 操作
+        return mac.doFinal(text);
+    }
+
+    private static final String MAC_NAME = "HmacSHA1";
+    private static final String ENCODING = "UTF-8";
 }
