@@ -25,6 +25,7 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
     private RichEditor richEditor;
     private RichEditor.EditorDelegate editorDelegate;
     private RecyclerView rvWordStyle;
+    String content;
 
     public RichEditor getRichEditor() {
         return richEditor;
@@ -51,6 +52,10 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
             @Override
             public void onGetContent(String paramString) {
                 Log.d("stateless","onGetContent: "+paramString);
+                if (richEditorListener!=null){
+                    richEditorListener.callbackGetContent(paramString);
+                }
+
             }
 
             @Override
@@ -277,6 +282,7 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
 
     public  interface  RichEditorListener{
         void clickMedia();
+        void callbackGetContent(String content);
     }
 
 

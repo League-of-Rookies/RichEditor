@@ -1368,8 +1368,8 @@ ZSSEditor.setProgressOnImage = function(imageNodeIdentifier, progress) {
 		if (progress >= 100) {
 			imageProgressNode.remove();
 			var pack = container.removeAttr('id').removeClass('img_container').removeAttr('data-failed');
-			pack.find('.image-caption').html('图片发自简书App'); // &nbsp; for iOS line-height bug.
-			pack.find('.image-caption-input').val('图片发自简书App'); // &nbsp; for iOS line-height bug.
+			pack.find('.image-caption').html('图片发自MYApp'); // &nbsp; for iOS line-height bug.
+			pack.find('.image-caption-input').val('图片发自MYApp'); // &nbsp; for iOS line-height bug.
 		} else if (imageProgressNode.length > 0) {
 			imageProgressNode.attr("value", progress / 100);
 		}

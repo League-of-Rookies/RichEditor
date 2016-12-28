@@ -7,6 +7,8 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.qiniu.android.common.Zone;
 import com.qiniu.android.http.ResponseInfo;
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         richEditorStandard = (RichEditorStandard)findViewById(R.id.res_editor);
         richEditorStandard.setRichEditorListener(new RichEditorStandard.RichEditorListener() {
             @Override
@@ -48,9 +51,34 @@ public class MainActivity extends AppCompatActivity {
                         android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(intent, 100);
             }
+
+            @Override
+            public void callbackGetContent(String content) {
+
+                PreViewActivity.start(MainActivity.this,content);
+            }
         });
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return  true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_preview:
+                richEditorStandard.getRichEditor().callGetArticleContent();
+//                Log.d("stateless",":"+richEditorStandard.getRichEditor().getArticleContent());
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

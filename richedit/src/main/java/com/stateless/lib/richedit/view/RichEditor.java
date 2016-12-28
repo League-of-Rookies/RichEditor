@@ -302,6 +302,9 @@ public class RichEditor extends WebView {
         return content;
     }
 
+    public String getArticleContent() {
+        return articleContent;
+    }
 
     public void callCancelRemoveCurrentImage() {
         exec("cancelRemoveCurrentImage");
@@ -733,6 +736,7 @@ public class RichEditor extends WebView {
                 if (delegate != null) {
                     delegate.onPageLoaded(jsSetting.toString());
                 }
+                loadUrl("javascript:"+jsSetting.toString());
             }
         });
 
@@ -1354,18 +1358,18 @@ public class RichEditor extends WebView {
         public JSBridge(){}
 
         @JavascriptInterface
-        public void init(WebView webView){
+        public void init(){
             Log.d(TAG,"!!!!!!! On JavascriptInterface Init !!!!!!!");
             post(fireOnEditorReady);
         }
 
         @JavascriptInterface
-        public void log(WebView webView,String msg){
+        public void log(String msg){
             Log.d(TAG,"New Log From JS:\n"+msg);
         }
 
         @JavascriptInterface
-        public void onSelectionChanged(WebView webView,String param){
+        public void onSelectionChanged(String param){
             String id="";
             int y=0;
             int h=0;
@@ -1405,7 +1409,7 @@ public class RichEditor extends WebView {
         }
 
         @JavascriptInterface
-        public void onSelectionStyles(WebView webView,String param){
+        public void onSelectionStyles(String param){
             Log.d(TAG,"onSelectionStyles "+param);
             String [] params=param.split("~",-1);
             CurrentStyles.reset();
@@ -1414,19 +1418,19 @@ public class RichEditor extends WebView {
         }
 
         @JavascriptInterface
-        public void onInput(WebView webView){
+        public void onInput(){
             Log.d(TAG,"onInput ");
             post(fireOnInput);
         }
 
         @JavascriptInterface
-        public  void onTap(WebView webView){
+        public  void onTap(){
             Log.d(TAG,"onTap ");
             post(fireOnTap);
         }
 
         @JavascriptInterface
-        public void onTapImage(WebView webView,String param){
+        public void onTapImage(String param){
             try {
                 String[] segments=param.split("~");
                 if (segments.length>=3){
@@ -1441,7 +1445,7 @@ public class RichEditor extends WebView {
         }
 
         @JavascriptInterface
-        public void onTapLink(WebView webView,String param){
+        public void onTapLink(String param){
             try {
                 String[] segments=param.split("~");
                 if (segments.length>=3){
@@ -1456,12 +1460,12 @@ public class RichEditor extends WebView {
         }
 
         @JavascriptInterface
-        public void onPaste(WebView webView) {
+        public void onPaste() {
             post(fireOnPaste);
         }
 
         @JavascriptInterface
-        public  void onGetImageStatus(WebView webView,String loadedImages,String loadingImages,String failedImages){
+        public  void onGetImageStatus(String loadedImages,String loadingImages,String failedImages){
             if (loadedImages.length()>4){
                 loadedImages=loadedImages.substring(2,loadedImages.length()-2);
                 RichEditor.this.loadedImages=loadedImages.split("\",\"");
@@ -1488,19 +1492,19 @@ public class RichEditor extends WebView {
         }
 
         @JavascriptInterface
-        public void getTitle(WebView webView,String title){
+        public void getTitle(String title){
             RichEditor.this.articleTitle=title;
             post(fireOnGetTitle);
         }
 
         @JavascriptInterface
-        public void getContent(WebView webView, String content) {
+        public void getContent(String content) {
             articleContent = content;
             post(fireOnGetContent);
         }
 
         @JavascriptInterface
-        public void getWordage(WebView webView, int wordage) {
+        public void getWordage( int wordage) {
             //            if(v.a()) {
 //                v.b(TAG, "onGetSelectTExt " + selectText);
 //            }
@@ -1515,7 +1519,7 @@ public class RichEditor extends WebView {
         }
 
         @JavascriptInterface
-        public void getSelectedText(WebView webView, String selectText) {
+        public void getSelectedText( String selectText) {
 //            if(v.a()) {
 //                v.b(TAG, "onGetSelectTExt " + selectText);
 //            }
@@ -1523,12 +1527,12 @@ public class RichEditor extends WebView {
             post(fireOnGetSelectedText);
         }
 
-        public void showKeyboard(WebView webView){
+        public void showKeyboard(){
             RichEditor.this.showKeyboard();
         }
 
 
-        public void hideKeyboard(WebView webView){
+        public void hideKeyboard(){
             RichEditor.this.hideKeyboard();
         }
     }
