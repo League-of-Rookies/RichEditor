@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -26,7 +25,6 @@ import java.util.regex.Pattern;
 public class RichEditor extends WebView {
 
     private static final String SETUP_HTML = "file:///android_asset/editor_v19/editorv19.html";
-    ;
 
     private static final boolean DEBUG = true;
     public static final long SHOW_EDITOR_DELAY = 300L;

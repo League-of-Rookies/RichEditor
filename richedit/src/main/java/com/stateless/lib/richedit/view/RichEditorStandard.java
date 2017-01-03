@@ -2,9 +2,6 @@ package com.stateless.lib.richedit.view;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
-import android.renderscript.Script;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -20,7 +17,7 @@ import com.stateless.lib.richedit.R;
  * Created by stateless on 2016/12/16.
  * 标准的富文本编辑器 封装ui和简书app的一致
  */
-public class RichEditorStandard extends RelativeLayout implements View.OnClickListener{
+public class RichEditorStandard extends RelativeLayout implements View.OnClickListener {
     private Activity mContext;
     private RichEditor richEditor;
     private RichEditor.EditorDelegate editorDelegate;
@@ -41,18 +38,20 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
 
     public RichEditorStandard(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mContext=(Activity) context;
+        if (isInEditMode()) return;
+        mContext = (Activity) context;
         initView();
     }
 
     private void initView() {
         LayoutInflater.from(mContext).inflate(R.layout.rich_editor_standard, this);
-        richEditor = (RichEditor)findViewById(R.id.editor);
+
+        richEditor = (RichEditor) findViewById(R.id.editor);
         editorDelegate = new RichEditor.EditorDelegate() {
             @Override
             public void onGetContent(String paramString) {
-                Log.d("stateless","onGetContent: "+paramString);
-                if (richEditorListener!=null){
+                Log.d("stateless", "onGetContent: " + paramString);
+                if (richEditorListener != null) {
                     richEditorListener.callbackGetContent(paramString);
                 }
 
@@ -61,81 +60,81 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
             @Override
             public void onGetImageStatus(String[] paramArrayOfString1, String[] paramArrayOfString2, String[] paramArrayOfString3) {
 
-                Log.d("stateless","onGetImageStatus: "+paramArrayOfString1+"---"+paramArrayOfString2+"---"+paramArrayOfString3);
+                Log.d("stateless", "onGetImageStatus: " + paramArrayOfString1 + "---" + paramArrayOfString2 + "---" + paramArrayOfString3);
             }
 
             @Override
             public void onGetSelectionInfo(String paramString, int paramInt1, int paramInt2, boolean paramBoolean) {
 
-                Log.d("stateless","onGetSelectionInfo: "+paramString+"---"+paramInt1+"---"+paramInt2+"---"+paramBoolean);
+                Log.d("stateless", "onGetSelectionInfo: " + paramString + "---" + paramInt1 + "---" + paramInt2 + "---" + paramBoolean);
             }
 
             @Override
             public void onGetSelectionStyles(RichEditor.ContentStyle paramContentStyle) {
 
-                Log.d("stateless","onGetSelectionStyles: "+paramContentStyle);
+                Log.d("stateless", "onGetSelectionStyles: " + paramContentStyle);
             }
 
             @Override
             public void onGetSelectionText(String paramString) {
 
-                Log.d("stateless","onGetSelectionText: "+paramString);
+                Log.d("stateless", "onGetSelectionText: " + paramString);
             }
 
             @Override
             public void onGetTitle(String paramString) {
 
-                Log.d("stateless","onGetTitle: "+paramString);
+                Log.d("stateless", "onGetTitle: " + paramString);
             }
 
             @Override
             public void onGetWordage(int paramInt) {
 
-                Log.d("stateless","onGetWordage: "+paramInt);
+                Log.d("stateless", "onGetWordage: " + paramInt);
             }
 
             @Override
             public void onInit() {
-                Log.d("stateless","onInit");
+                Log.d("stateless", "onInit");
             }
 
             @Override
             public void onInput() {
 
-                Log.d("stateless","onInput: ");
+                Log.d("stateless", "onInput: ");
             }
 
             @Override
             public void onPageLoaded(String paramString) {
-                Log.d("stateless","onpageloaded");
+                Log.d("stateless", "onpageloaded");
                 postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         richEditor.focusOnContent();
                     }
-                },300L);
+                }, 300L);
             }
 
             @Override
             public void onTap() {
 
-                Log.d("stateless","onTap: ");
+                Log.d("stateless", "onTap: ");
             }
 
             @Override
             public void onTapImage(String paramString1, String paramString2) {
 
-                Log.d("stateless","onTapImage: "+paramString1+"----"+paramString2);
+                Log.d("stateless", "onTapImage: " + paramString1 + "----" + paramString2);
             }
 
             @Override
             public void onTapLink(String paramString1, String paramString2) {
 
-                Log.d("stateless","onTapLink: "+paramString1+"----"+paramString2);
+                Log.d("stateless", "onTapLink: " + paramString1 + "----" + paramString2);
             }
         };
         richEditor.init(mContext, editorDelegate, false, true, true);
-        rvWordStyle = (RecyclerView)findViewById(R.id.rv_word_style);
+        rvWordStyle = (RecyclerView) findViewById(R.id.rv_word_style);
         initWordStyleList();
 
         TextView media = (TextView) findViewById(R.id.tv_media);
@@ -165,11 +164,11 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
             @Override
             public void onItemClick(View view, int position) {
                 WordStyleModel model = adapter.getList().get(position);
-                if (position>3){
+                if (position > 3) {
 
-                    for (int i=0;i<adapter.getList().size();i++){
-                        if (i>3){
-                            if (i==position){
+                    for (int i = 0; i < adapter.getList().size(); i++) {
+                        if (i > 3) {
+                            if (i == position) {
                                 continue;
                             }
                             adapter.getList().get(i).setSelect(false);
@@ -177,7 +176,7 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
                         }
                     }
                     model.setSelect(!model.isSelect());
-                }else {
+                } else {
                     model.setSelect(!model.isSelect());
                 }
                 adapter.notifyDataSetChanged();
@@ -192,7 +191,7 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
     }
 
     private void clickWordStyle(int position) {
-        switch (position){
+        switch (position) {
             case 0:
                 richEditor.callSetFontBold();
                 break;
@@ -235,8 +234,8 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
             richEditor.callRedo();
         } else if (i == R.id.tv_undo) {
             richEditor.callUndo();
-        } else if (i==R.id.tv_more){
-            final MoreDialogFragment moreDialogFragment=new MoreDialogFragment();
+        } else if (i == R.id.tv_more) {
+            final MoreDialogFragment moreDialogFragment = new MoreDialogFragment();
             moreDialogFragment.setDialogListener(new MoreDialogFragment.MoreDialogFragmentListener() {
                 @Override
                 public void clickLine() {
@@ -246,7 +245,7 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
 
                 @Override
                 public void clickLink() {
-                    final InputLinkDialogFragment inputLinkDialogFragment=new InputLinkDialogFragment();
+                    final InputLinkDialogFragment inputLinkDialogFragment = new InputLinkDialogFragment();
                     inputLinkDialogFragment.setDialogListener(new InputLinkDialogFragment.InputLinkDialogFragmentListener() {
                         @Override
                         public void clickCancel() {
@@ -255,7 +254,7 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
 
                         @Override
                         public void clickSure(String name, String link) {
-                            richEditor.callInsertLink(link,name);
+                            richEditor.callInsertLink(link, name);
                             inputLinkDialogFragment.dismiss();
                         }
                     });
@@ -265,14 +264,14 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
                 }
             });
             moreDialogFragment.show(mContext.getFragmentManager(), "more_dialog_fragment");
-        }else if (i==R.id.tv_word_style){
-            if (rvWordStyle.isShown()){
+        } else if (i == R.id.tv_word_style) {
+            if (rvWordStyle.isShown()) {
                 rvWordStyle.setVisibility(GONE);
-            }else {
+            } else {
                 rvWordStyle.setVisibility(VISIBLE);
             }
-        }else if (i == R.id.tv_media) {
-            if (richEditorListener!=null){
+        } else if (i == R.id.tv_media) {
+            if (richEditorListener != null) {
                 richEditorListener.clickMedia();
             }
         }
@@ -280,8 +279,9 @@ public class RichEditorStandard extends RelativeLayout implements View.OnClickLi
     }
 
 
-    public  interface  RichEditorListener{
+    public interface RichEditorListener {
         void clickMedia();
+
         void callbackGetContent(String content);
     }
 
