@@ -20,7 +20,7 @@ import java.util.List;
 public class WordStyleAdapter extends RecyclerView.Adapter<WordStyleAdapter.WordStyleViewHold>{
 
     private Context context;
-    private String[] title={"B","I","$","U","\"","H1","H2","H3","H4"};
+    private String[] title={"B","/","$","U","\"","H1","H2","H3","H4"};
 
     private List<WordStyleModel> list;
 
